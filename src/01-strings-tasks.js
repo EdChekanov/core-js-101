@@ -5,7 +5,6 @@
  *                                                                                           *
  ******************************************************************************************* */
 
-
 /**
  * Returns the result of concatenation of two strings.
  *
@@ -21,7 +20,6 @@
 function concatenateStrings(a, b) {
   return a + b;
 }
-
 
 /**
  * Returns the length of given string.
@@ -68,7 +66,6 @@ function getStringFromTemplate(firstName, lastName) {
 function extractNameFromTemplate(value) {
   return value.slice(7, -1);
 }
-
 
 /**
  * Returns a first char of the given string.
@@ -130,8 +127,9 @@ function repeatString(value, count) {
  *   'I like legends', 'end' => 'I like legs',
  *   'ABABAB','BA' => 'ABAB'
  */
-function removeFirstOccurrences(/* str, value */) {
-  throw new Error('Not implemented');
+function removeFirstOccurrences(str, value) {
+  const idx = str.indexOf(value);
+  return str.slice(0, idx) + str.slice(idx + value.length, str.length);
 }
 
 /**
@@ -145,10 +143,11 @@ function removeFirstOccurrences(/* str, value */) {
  *   '<span>' => 'span'
  *   '<a>' => 'a'
  */
-function unbracketTag(/* str */) {
-  throw new Error('Not implemented');
+function unbracketTag(str) {
+  const openBracketIdx = str.indexOf('<');
+  const closeBracketIdx = str.indexOf('>');
+  return str.slice(openBracketIdx + 1, closeBracketIdx);
 }
-
 
 /**
  * Converts all characters of the specified string into the upper case
@@ -160,8 +159,8 @@ function unbracketTag(/* str */) {
  *   'Thunderstruck' => 'THUNDERSTRUCK'
  *  'abcdefghijklmnopqrstuvwxyz' => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
  */
-function convertToUpperCase(/* str */) {
-  throw new Error('Not implemented');
+function convertToUpperCase(str) {
+  return str.toUpperCase();
 }
 
 /**
@@ -179,8 +178,8 @@ function convertToUpperCase(/* str */) {
  *   ],
  *   'info@gmail.com' => ['info@gmail.com']
  */
-function extractEmails(/* str */) {
-  throw new Error('Not implemented');
+function extractEmails(str) {
+  return str.split(';');
 }
 
 /**
@@ -206,10 +205,29 @@ function extractEmails(/* str */) {
  *             '└──────────┘\n'
  *
  */
-function getRectangleString(/* width, height */) {
-  throw new Error('Not implemented');
+function getRectangleString(width, height) {
+  let result = '';
+  for (let i = 0; i < height; i += 1) {
+    const line = new Array(width);
+    if (i === 0 || i === height - 1) {
+      line.fill('─');
+    } else {
+      line.fill(' ');
+    }
+    if (i === 0) {
+      line[0] = '┌';
+      line[width - 1] = '┐';
+    } else if (i === height - 1) {
+      line[0] = '└';
+      line[width - 1] = '┘';
+    } else {
+      line[0] = '│';
+      line[width - 1] = '│';
+    }
+    result += `${line.join('')}\n`;
+  }
+  return result;
 }
-
 
 /**
  * Encode specified string with ROT13 cipher
@@ -248,7 +266,6 @@ function isString(/* value */) {
   throw new Error('Not implemented');
 }
 
-
 /**
  * Returns playid card id.
  *
@@ -276,7 +293,6 @@ function isString(/* value */) {
 function getCardId(/* value */) {
   throw new Error('Not implemented');
 }
-
 
 module.exports = {
   concatenateStrings,
