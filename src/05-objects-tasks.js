@@ -6,7 +6,6 @@
  *                                                                                                *
  ************************************************************************************************ */
 
-
 /**
  * Returns the rectangle object with width and height parameters and getArea() method
  *
@@ -20,10 +19,11 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
+  this.getArea = () => this.width * this.height;
 }
-
 
 /**
  * Returns the JSON representation of specified object
@@ -35,10 +35,9 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
-
 
 /**
  * Returns the object of specified type from JSON representation
@@ -51,10 +50,9 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  return Object.setPrototypeOf(JSON.parse(json), proto);
 }
-
 
 /**
  * Css selectors builder
@@ -111,35 +109,132 @@ function fromJSON(/* proto, json */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  isInstance: false,
+  result: '',
+  order: '',
+  createInstance() {
+    const instance = Object.create(this);
+    instance.isInstance = true;
+    return instance;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  instanceCheck(obj) {
+    if (!obj.isInstance) return this.createInstance();
+    return this;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    this.orderCheck('tag');
+    const obj = this.instanceCheck(this);
+    obj.validCheck('tag');
+    obj.result = [...obj.result, `${value}`];
+    obj.order = [...obj.order, 'tag'];
+    return obj;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    this.orderCheck('id');
+    const obj = this.instanceCheck(this);
+    obj.validCheck('id');
+    obj.result = [...obj.result, `#${value}`];
+    obj.order = [...obj.order, 'id'];
+    return obj;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    this.orderCheck('class');
+    const obj = this.instanceCheck(this);
+    obj.result = [...obj.result, `.${value}`];
+    obj.order = [...obj.order, 'class'];
+    return obj;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    this.orderCheck('attr');
+    const obj = this.instanceCheck(this);
+    obj.result = [...obj.result, `[${value}]`];
+    obj.order = [...obj.order, 'attr'];
+    return obj;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    this.orderCheck('pc');
+    const obj = this.instanceCheck(this);
+    obj.result = [...obj.result, `:${value}`];
+    obj.order = [...obj.order, 'pc'];
+    return obj;
+  },
+
+  pseudoElement(value) {
+    const obj = this.instanceCheck(this);
+    obj.validCheck('pe');
+    obj.result = [...obj.result, `::${value}`];
+    obj.order = [...obj.order, 'pe'];
+    return obj;
+  },
+
+  combine(selector1, combinator, selector2) {
+    const obj = this.instanceCheck(this);
+    obj.result = [
+      ...selector1.result,
+      ' ',
+      combinator,
+      ' ',
+      ...selector2.result,
+    ];
+    obj.order = [...selector1.order, combinator, ...selector2.order];
+    return obj;
+  },
+
+  stringify() {
+    return this.result.join('');
+  },
+
+  validCheck(selectorName) {
+    if (this.order.indexOf(selectorName) >= 0) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+  },
+
+  orderCheck(selectorName) {
+    let condition;
+    switch (selectorName) {
+      case 'tag':
+        condition = this.order.includes('id')
+          || this.order.includes('class')
+          || this.order.includes('attr')
+          || this.order.includes('pc')
+          || this.order.includes('pe');
+        break;
+      case 'id':
+        condition = this.order.includes('class')
+          || this.order.includes('attr')
+          || this.order.includes('pc')
+          || this.order.includes('pe');
+        break;
+      case 'class':
+        condition = this.order.includes('attr')
+          || this.order.includes('pc')
+          || this.order.includes('pe');
+        break;
+      case 'attr':
+        condition = this.order.includes('pc') || this.order.includes('pe');
+        break;
+      case 'pc':
+        condition = this.order.includes('pe');
+        break;
+      default:
+        condition = false;
+    }
+    if (condition) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element',
+      );
+    }
   },
 };
-
 
 module.exports = {
   Rectangle,
